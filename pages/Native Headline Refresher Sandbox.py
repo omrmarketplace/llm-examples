@@ -10,7 +10,7 @@ st.description("Creates 3 new headline refreshes based on the input.")
 
 # Sidebar for OpenAI API key input
 with st.sidebar:
-    openai_api_key = st.text_input("OpenAI API Key", key="openai_api_key", type="password")
+    openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
     "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
 
 # Function to generate response using OpenAI API
