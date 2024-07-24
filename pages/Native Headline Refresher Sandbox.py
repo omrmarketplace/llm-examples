@@ -3,8 +3,9 @@ from langchain.llms import OpenAI
 
 st.title("🦜🔗 Langchain Quickstart App")
 
-openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"];
-
+with st.sidebar:
+    openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+    "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
 
 
 def generate_response(input_text):
