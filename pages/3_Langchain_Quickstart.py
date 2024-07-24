@@ -7,11 +7,12 @@ with st.sidebar:
     openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
     "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
 
+client = OpenAI(api_key=openai_api_key)
 
 # Function to generate response using OpenAI API
 def generate_response(input_text):
     response = client.chat.completions.create(
-        model="gpt-4",  # Make sure to use an available model
+        model="gpt-4o",  # Make sure to use an available model
         messages=[
             {
                 "role": "system",
