@@ -12,7 +12,7 @@ client = OpenAI(api_key=openai_api_key)
 # Function to generate response using OpenAI API
 def generate_response(input_text):
     response = client.chat.completions.create(
-        model="gpt-4o",  # Make sure to use an available model
+        model="gpt-4-turbo",  # Make sure to use an available model
         messages=[
             {
                 "role": "system",
