@@ -9,9 +9,8 @@ with st.sidebar:
 
 
 def generate_response(input_text):
-    llm = OpenAI(temperature=0.7, openai_api_key=openai_api_key)
+    llm = OpenAI(temperature=0.7, openai_api_key=openai_api_key, engine="gpt-4-turbo")
     st.info(llm(input_text))
-
 
 with st.form("my_form"):
     text = st.text_area("Enter text:", "What are 3 key advice for learning how to code?")
