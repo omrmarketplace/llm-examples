@@ -1,5 +1,6 @@
+
 import streamlit as st
-from langchain.llms import OpenAI
+import openai
 
 st.title("🦜🔗 Langchain Quickstart App")
 
@@ -8,9 +9,17 @@ with st.sidebar:
     "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
 
 
+openai.api_key = openai_api_key
+
 def generate_response(input_text):
-    llm = OpenAI(temperature=0.7, openai_api_key=openai_api_key, engine="gpt-4-turbo")
-    st.info(llm(input_text))
+    response = openai.Completion.create(
+        engine="gpt-4",
+        prompt=input_text,
+        temperature=0.7,
+        max_tokens=150
+    )
+    message = response.choices[0].text.strip()
+    st.info(message)
 
 with st.form("my_form"):
     text = st.text_area("Enter text:", "What are 3 key advice for learning how to code?")
@@ -19,3 +28,4 @@ with st.form("my_form"):
         st.info("Please add your OpenAI API key to continue.")
     elif submitted:
         generate_response(text)
+
