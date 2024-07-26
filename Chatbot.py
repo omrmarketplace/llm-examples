@@ -1,8 +1,17 @@
-
-
 from openai import OpenAI
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
+import streamlit_gsheets
+
+# Patch the streamlit_gsheets library to fix the import issue
+import types
+def patched_import():
+    import streamlit.runtime.type_util
+    streamlit_gsheets.gsheets_connection.convert_anything_to_df = streamlit.runtime.type_util.convert_anything_to_df
+    streamlit_gsheets.gsheets_connection.is_dataframe_compatible = streamlit.runtime.type_util.is_dataframe_compatible
+
+streamlit_gsheets.gsheets_connection.__dict__['patched_import'] = patched_import
+streamlit_gsheets.gsheets_connection.patched_import()
 
 # Set page configuration to use the full width of the page
 st.set_page_config(layout="wide")
@@ -17,8 +26,6 @@ st.title("💬 Chatbot")
 st.caption("🚀 A Streamlit chatbot powered by OpenAI")
 
 st.title("Read Google Sheet as DataFrame")
-
-
 
 conn = st.connection("gsheets", type=GSheetsConnection)
 url = "https://docs.google.com/spreadsheets/d/1x83yhdkzC10ddFqYmYIUQ1lSwURDGOZiQtvIhKb-45M/edit?usp=sharing"
@@ -55,8 +62,3 @@ grouped_data.insert(0, 'Select', False)
 
 # Display the dataframe
 st.dataframe(grouped_data, use_container_width=True)
-
-
-
-
-
