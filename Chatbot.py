@@ -14,13 +14,12 @@ st.caption("🚀 A Streamlit chatbot powered by OpenAI")
 
 from streamlit_gsheets import GSheetsConnection
 
-url = "https://docs.google.com/spreadsheets/d/1JDy9md2VZPz4JbYtRPJLs81_3jUK47nx6GYQjgU8qNY/edit?usp=sharing"
+st.title("Read Google Sheet as DataFrame")
 
 conn = st.connection("gsheets", type=GSheetsConnection)
+df = conn.read(worksheet="Extract")
 
-data = conn.read(spreadsheet=url, usecols=[0, 1])
-st.dataframe(data)
-
+st.dataframe(df)
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
 
