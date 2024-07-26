@@ -1,5 +1,6 @@
 from openai import OpenAI
 import streamlit as st
+from streamlit_gsheets import GSheetsConnection
 
 with st.sidebar:
     openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
@@ -10,14 +11,10 @@ with st.sidebar:
 st.title("💬 Chatbot")
 st.caption("🚀 A Streamlit chatbot powered by OpenAI")
 
-# example/st_app.py
-
-from streamlit_gsheets import GSheetsConnection
-
 st.title("Read Google Sheet as DataFrame")
 
 conn = st.connection("gsheets", type=GSheetsConnection)
-df = conn.read(worksheet="Extract")
+df = conn.read(spreadsheet="https://docs.google.com/spreadsheets/d/1nHlrJi9OVoBbSkrcsV64nJyNfN-xFwtvmP5s9RjyKLk/edit?gid=1386190854#gid=1386190854",worksheet="Test")
 
 st.dataframe(df)
 if "messages" not in st.session_state:
