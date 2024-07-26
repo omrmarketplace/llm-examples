@@ -25,6 +25,37 @@ url = "https://docs.google.com/spreadsheets/d/1x83yhdkzC10ddFqYmYIUQ1lSwURDGOZiQ
 
 data = conn.read(spreadsheet=url, usecols=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
+# Calculate profit
+data['profit'] = data['conv_value'] - data['spend']
+
+# Streamlit UI components
+st.title("Profitable Items Analysis")
+
+# Filter by content_provider_name
+content_provider_names = data['content_provider_name'].unique()
+selected_content_provider = st.selectbox("Select Content Provider", content_provider_names)
+
+# Spend floor slider
+spend_floor = st.slider("Set Spend Floor", min_value=float(data['spend'].min()), max_value=float(data['spend'].max()), value=float(data['spend'].min()))
+
+# Filter data based on selections
+filtered_data = data[(data['content_provider_name'] == selected_content_provider) & (data['spend'] >= spend_floor)]
+
+# Group by item_name and calculate total profit and spend
+grouped_data = filtered_data.groupby('item_name').agg({
+    'spend': 'sum',
+    'profit': 'sum'
+}).reset_index()
+
+# Sort by profit
+grouped_data = grouped_data.sort_values(by='profit', ascending=False)
+
+# Add checkbox column for selection
+grouped_data.insert(0, 'Select', False)
+
+# Display the dataframe
+st.dataframe(grouped_data, use_container_width=True)
+
 
 
 
