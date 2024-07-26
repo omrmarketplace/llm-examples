@@ -9,6 +9,18 @@ with st.sidebar:
 
 st.title("💬 Chatbot")
 st.caption("🚀 A Streamlit chatbot powered by OpenAI")
+
+# example/st_app.py
+
+from streamlit_gsheets import GSheetsConnection
+
+url = "https://docs.google.com/spreadsheets/d/1JDy9md2VZPz4JbYtRPJLs81_3jUK47nx6GYQjgU8qNY/edit?usp=sharing"
+
+conn = st.connection("gsheets", type=GSheetsConnection)
+
+data = conn.read(spreadsheet=url, usecols=[0, 1])
+st.dataframe(data)
+
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
 
