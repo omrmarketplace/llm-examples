@@ -6,12 +6,6 @@ import pandas as pd
 # Set page configuration to use the full width of the page
 st.set_page_config(layout="wide")
 
-with st.sidebar:
-    openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
-    "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
-    "[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)"
-    "[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)"
-
 st.title("💬 Chatbot")
 st.caption("🚀 A Streamlit chatbot powered by OpenAI")
 
@@ -54,21 +48,15 @@ profitable_data = grouped_data[grouped_data['profit'] > 0]
 st.subheader("Profitable Items")
 st.write(profitable_data)
 
-# Select an item_name to extract its profit and spend
-selected_item_name = st.selectbox("Select Item Name", profitable_data['item_name'])
-
-# Extract values for the selected item name
-selected_item_data = profitable_data[profitable_data['item_name'] == selected_item_name]
-
 with st.sidebar:
-    api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+    openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
     "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
 
 # Function to generate response using OpenAI API
+client = OpenAI(api_key=openai_api_key)
 def generate_response(input_text):
-    client = OpenAI(api_key=openai_api_key)
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {
                 "role": "system",
@@ -95,8 +83,10 @@ def generate_response(input_text):
     )
     return response
 
-# Generate response for the selected item name
-if st.button("Generate Response"):
-    response = generate_response(selected_item_name)
-    st.subheader("Generated Response")
-    st.write(response)
+# Generate responses for all items in profitable_data
+if st.button("Generate Responses for All Items"):
+    st.subheader("Generated Responses for All Items")
+    for item in profitable_data['item_name']:
+        response = generate_response(item)
+        st.markdown(f"### Item Name: {item}")
+        st.write(response)
