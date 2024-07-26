@@ -1,8 +1,7 @@
 from openai import OpenAI
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
-import streamlit_gsheets
-
+import pandas as pd
 
 # Set page configuration to use the full width of the page
 st.set_page_config(layout="wide")
@@ -48,8 +47,9 @@ grouped_data = filtered_data.groupby('item_name').agg({
 # Sort by profit
 grouped_data = grouped_data.sort_values(by='profit', ascending=False)
 
-# Add checkbox column for selection
-grouped_data.insert(0, 'Select', False)
+# Filter out rows where profit is less than or equal to 0
+profitable_data = grouped_data[grouped_data['profit'] > 0]
 
-# Display the dataframe
-st.dataframe(grouped_data, use_container_width=True)
+# Display the filtered DataFrame
+st.subheader("Profitable Items")
+st.write(profitable_data)
