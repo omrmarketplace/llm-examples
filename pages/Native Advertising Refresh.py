@@ -1,11 +1,11 @@
 import streamlit as st
 from openai import OpenAI
-
+import pandas as pd
 
 st.title("🦜🔗 Native Headline Refresh Tool")
 
 with st.sidebar:
-    api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+    api_key = ""
     "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
 
 client = OpenAI(api_key=api_key)
@@ -46,8 +46,21 @@ with st.form("my_form"):
     if submitted:
         st.session_state.response = generate_response(text)  # Store response in session state
 
-# Display the parsed response
+# Display the parsed response in a DataFrame
 if "response" in st.session_state:
-        st.write(generate_response(text))
+    # Extract the 'content' from the response object
+    content = st.session_state.response.choices[0].message.content
+
+    # Convert the content to a DataFrame
+    data = {"Response": [content]}  # Create a dictionary to structure the DataFrame
+    df = pd.DataFrame(data)  # Create a DataFrame
+
+    # Display the DataFrame in Streamlit
+    st.subheader("Response Data")
+    st.dataframe(df)
+
+
+
+
 
 

@@ -16,44 +16,53 @@ url = "https://docs.google.com/spreadsheets/d/1x83yhdkzC10ddFqYmYIUQ1lSwURDGOZiQ
 
 data = conn.read(spreadsheet=url, usecols=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
+
 # Calculate profit
 data['profit'] = data['conv_value'] - data['spend']
 
-# Streamlit UI components
-st.title("Profitable Items Analysis")
-
-# Filter by content_provider_name
-content_provider_names = data['content_provider_name'].unique()
-selected_content_provider = st.selectbox("Select Content Provider", content_provider_names)
-
-# Spend floor slider
-spend_floor = st.slider("Set Spend Floor", min_value=float(data['spend'].min()), max_value=float(data['spend'].max()), value=float(data['spend'].min()))
-
-# Filter data based on selections
-filtered_data = data[(data['content_provider_name'] == selected_content_provider) & (data['spend'] >= spend_floor)]
-
-# Group by item_name and calculate total profit and spend
-grouped_data = filtered_data.groupby('item_name').agg({
+# Step 1: Aggregate all data by item_name without any filters
+aggregated_data = data.groupby('item_name').agg({
+    'content_provider_name': 'first',  # assuming each item has a single content provider
     'spend': 'sum',
     'profit': 'sum'
 }).reset_index()
 
-# Sort by profit
-grouped_data = grouped_data.sort_values(by='profit', ascending=False)
+# Display the temporary DataFrame for verification
+st.subheader("Aggregated Data (No Filters Applied)")
+st.write(aggregated_data)
 
-# Filter out rows where profit is less than or equal to 0
-profitable_data = grouped_data[grouped_data['profit'] > 0]
+# Step 2: Apply filters after aggregation
+
+# Content provider filter
+content_provider_names = aggregated_data['content_provider_name'].unique()
+selected_content_provider = st.selectbox("Select Content Provider", content_provider_names)
+
+# Spend floor filter
+max_spend = aggregated_data['spend'].max()
+spend_floor = st.slider("Set Spend Floor", min_value=0.0, max_value=float(max_spend), value=0.0)
+
+# Profit filter (only positive profits)
+filtered_data = aggregated_data[
+    (aggregated_data['content_provider_name'] == selected_content_provider) &
+    (aggregated_data['spend'] >= spend_floor) &
+    (aggregated_data['profit'] > 0)
+]
 
 # Display the filtered DataFrame
 st.subheader("Profitable Items")
-st.write(profitable_data)
+st.write(filtered_data)
 
-with st.sidebar:
-    openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
-    "[Get an OpenAI API key](https://platform.openai.com/account/api-keys)"
+# Calculate total metrics after filtering
+total_spend = filtered_data['spend'].sum()
+total_profit = filtered_data['profit'].sum()
 
-# Function to generate response using OpenAI API
-client = OpenAI(api_key=openai_api_key)
+# Display total metrics
+st.subheader("Total Metrics")
+st.write(f"Total Spend: ${total_spend:,.2f}")
+st.write(f"Total Profit: ${total_profit:,.2f}")
+
+
+client = OpenAI(api_key=api_key)
 def generate_response(input_text):
     response = client.chat.completions.create(
         model="gpt-4o",
@@ -72,7 +81,7 @@ def generate_response(input_text):
             },
             {
                 "role": "user",
-                "content": input_text
+                "content": text
             }
         ],
         temperature=0.7,
@@ -83,10 +92,23 @@ def generate_response(input_text):
     )
     return response
 
-# Generate responses for all items in profitable_data
-if st.button("Generate Responses for All Items"):
-    st.subheader("Generated Responses for All Items")
-    for item in profitable_data['item_name']:
-        response = generate_response(item)
-        st.markdown(f"### Item Name: {item}")
-        st.write(response)
+
+# Create a form in the Streamlit app
+with st.form("my_form"):
+    text = st.text_area("Enter your prompt:", "What are 3 key pieces of advice for learning how to code?", height=150)
+    submitted = st.form_submit_button("Submit")
+    if submitted:
+        st.session_state.response = generate_response(text)  # Store response in session state
+
+# Display the parsed response in a DataFrame
+if "response" in st.session_state:
+    # Extract the 'content' from the response object
+    content = st.session_state.response.choices[0].message.content
+
+    # Convert the content to a DataFrame
+    data = {"Response": [content]}  # Create a dictionary to structure the DataFrame
+    df = pd.DataFrame(data)  # Create a DataFrame
+
+    # Display the DataFrame in Streamlit
+    st.subheader("Response Data")
+    st.dataframe(df)
