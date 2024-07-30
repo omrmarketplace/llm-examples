@@ -73,6 +73,7 @@ final_profitable_data = final_profitable_data.sort_values(by='profit', ascending
 
 # Display the filtered DataFrame
 st.subheader("Profitable Headlines")
+st.markdown('Curious about the underlying data? Check that out [here](https://docs.google.com/spreadsheets/d/1nHlrJi9OVoBbSkrcsV64nJyNfN-xFwtvmP5s9RjyKLk/edit?gid=567753254#gid=567753254)')
 st.write(final_profitable_data)
 
 client = OpenAI(api_key=api_key)
