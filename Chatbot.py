@@ -7,7 +7,7 @@ import pandas as pd
 # Set page configuration to use the full width of the page
 st.set_page_config(layout="wide")
 
-openai_api_key = "sk-None-hbGdbBzuPqu8ZN9qY3jMT3BlbkFJaDsMbJ1HZfDDHgHIgnc5"
+openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
 st.title("💬 Native Advertising Headline Refresh")
 st.caption("🚀 AI powered headline refresh tool")
