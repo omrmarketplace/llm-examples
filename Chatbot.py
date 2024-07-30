@@ -7,12 +7,10 @@ import pandas as pd
 # Set page configuration to use the full width of the page
 st.set_page_config(layout="wide")
 
-api_key = ""
+openai_api_key = "sk-None-hbGdbBzuPqu8ZN9qY3jMT3BlbkFJaDsMbJ1HZfDDHgHIgnc5"
 
-st.title("💬 Chatbot")
-st.caption("🚀 A Streamlit chatbot powered by OpenAI")
-
-st.title("Read Google Sheet as DataFrame")
+st.title("💬 Native Advertising Headline Refresh")
+st.caption("🚀 AI powered headline refresh tool")
 
 conn = st.connection("gsheets", type=GSheetsConnection)
 url = "https://docs.google.com/spreadsheets/d/1x83yhdkzC10ddFqYmYIUQ1lSwURDGOZiQtvIhKb-45M/edit?usp=sharing"
@@ -23,12 +21,9 @@ data = conn.read(spreadsheet=url, usecols=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 # Calculate profit
 data['profit'] = data['conv_value'] - data['spend']
 
-# Streamlit UI components
-st.title("Profitable Items Analysis")
-
 # Filter by content_provider_name
 content_provider_names = data['content_provider_name'].unique()
-selected_content_provider = st.selectbox("Select Content Provider", content_provider_names)
+selected_content_provider = st.selectbox("Select Buyside Account", content_provider_names)
 
 # Filter data based on selected content provider
 filtered_data = data[data['content_provider_name'] == selected_content_provider]
@@ -39,16 +34,35 @@ grouped_data = filtered_data.groupby('item_name').agg({
     'profit': 'sum'
 }).reset_index()
 
-# Filter out rows where profit is less than or equal to 0
-profitable_data = grouped_data[grouped_data['profit'] > 0]
+# Set up profit filter slider
+min_profit = float(grouped_data['profit'].min())
+max_profit = float(grouped_data['profit'].max())
+if min_profit == max_profit:
+    max_profit += 1  # Ensure slider has a range
+profit_floor = st.slider(
+    "Set Minimum Required Profit (default is 0)", 
+    min_value=min_profit, 
+    max_value=max_profit, 
+    value=min_profit,
+    key="profit_slider"
+)
+
+# Filter out rows where profit is less than profit_floor
+profitable_data = grouped_data[grouped_data['profit'] > profit_floor]
 
 # Set up spend filter slider after grouping
+min_spend = float(profitable_data['spend'].min())
+max_spend = float(profitable_data['spend'].max())
+if min_spend == max_spend:
+    max_spend += 1  # Ensure slider has a range
 spend_floor = st.slider(
-    "Set Spend Floor", 
-    min_value=float(profitable_data['spend'].min()), 
-    max_value=float(profitable_data['spend'].max()), 
-    value=float(profitable_data['spend'].min())
+    "Set Minimum Required Spend (starts at the lowest profitable headline spend amount)", 
+    min_value=min_spend, 
+    max_value=max_spend, 
+    value=min_spend,
+    key="spend_slider"
 )
+
 
 # Apply spend floor filter to the already calculated profitable_data
 final_profitable_data = profitable_data[profitable_data['spend'] >= spend_floor]
@@ -57,11 +71,10 @@ final_profitable_data = profitable_data[profitable_data['spend'] >= spend_floor]
 final_profitable_data = final_profitable_data.sort_values(by='profit', ascending=False)
 
 # Display the filtered DataFrame
-st.subheader("Profitable Items")
+st.subheader("Profitable Headlines")
 st.write(final_profitable_data)
 
 client = OpenAI(api_key=openai_api_key)
-
 
 def generate_response(input_text):
     response = client.chat.completions.create(
@@ -81,7 +94,7 @@ def generate_response(input_text):
             },
             {
                 "role": "user",
-                "content": text
+                "content": input_text
             }
         ],
         temperature=0.7,
@@ -90,25 +103,27 @@ def generate_response(input_text):
         frequency_penalty=0,
         presence_penalty=0
     )
-    return response
+    return response.choices[0].message.content
 
+def generate_variants():
+    # Iterate over each item_name in final_profitable_data and generate response
+    responses = []
+    for index, row in final_profitable_data.iterrows():
+        item_name = row['item_name']
+        response_content = generate_response(item_name)
+        responses.append({"Item Name": item_name, "Generated Response": response_content})
 
-# Create a form in the Streamlit app
-with st.form("my_form"):
-    text = st.text_area("Enter your prompt:", "What are 3 key pieces of advice for learning how to code?", height=150)
-    submitted = st.form_submit_button("Submit")
-    if submitted:
-        st.session_state.response = generate_response(text)  # Store response in session state
+    # Convert the list of responses to a DataFrame
+    response_df = pd.DataFrame(responses)
+    
+    # Store the generated responses in session state to avoid regeneration on re-renders
+    st.session_state.response_df = response_df
 
-# Display the parsed response in a DataFrame
-if "response" in st.session_state:
-    # Extract the 'content' from the response object
-    content = st.session_state.response.choices[0].message.content
+# Button to generate variants
+if st.button("Generate Variants"):
+    generate_variants()
 
-    # Convert the content to a DataFrame
-    data = {"Response": [content]}  # Create a dictionary to structure the DataFrame
-    df = pd.DataFrame(data)  # Create a DataFrame
-
-    # Display the DataFrame in Streamlit
-    st.subheader("Response Data")
-    st.dataframe(df)
+# Display the responses DataFrame if available
+if 'response_df' in st.session_state:
+    st.subheader("Generated Responses for Profitable Items")
+    st.write(st.session_state.response_df)
