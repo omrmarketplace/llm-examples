@@ -7,7 +7,8 @@ import pandas as pd
 # Set page configuration to use the full width of the page
 st.set_page_config(layout="wide")
 
-openai_api_key = ""
+with st.sidebar:
+    api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
 st.title("💬 Native Advertising Headline Refresh")
 st.caption("🚀 AI powered headline refresh tool")
@@ -74,7 +75,7 @@ final_profitable_data = final_profitable_data.sort_values(by='profit', ascending
 st.subheader("Profitable Headlines")
 st.write(final_profitable_data)
 
-client = OpenAI(api_key=openai_api_key)
+client = OpenAI(api_key=api_key)
 
 def generate_response(input_text):
     response = client.chat.completions.create(
