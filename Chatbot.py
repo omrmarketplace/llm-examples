@@ -11,7 +11,7 @@ with st.sidebar:
     api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
 st.title("💬 Native Advertising Headline Refresh")
-st.caption("🚀 AI powered headline refresh tool")
+st.caption("🚀 AI powered headline refresh tool. Every 2000 headlines you refresh costs us about $5")
 
 conn = st.connection("gsheets", type=GSheetsConnection)
 url = "https://docs.google.com/spreadsheets/d/1x83yhdkzC10ddFqYmYIUQ1lSwURDGOZiQtvIhKb-45M/edit?usp=sharing"
