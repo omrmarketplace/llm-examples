@@ -46,5 +46,5 @@ OPENAI_API_KEY='xxxxxxxxxx'
 virtualenv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-streamlit run Native Headline Refresher.py
+streamlit run Chatbot.py
 ```
