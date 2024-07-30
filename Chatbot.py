@@ -44,7 +44,7 @@ profit_floor = st.slider(
     "Set Minimum Required Profit (default is 0)", 
     min_value=min_profit, 
     max_value=max_profit, 
-    value=min_profit,
+    value=0,
     key="profit_slider"
 )
 
