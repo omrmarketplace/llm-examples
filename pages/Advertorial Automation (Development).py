@@ -135,7 +135,7 @@ def main():
 
         # Button to generate article introduction
         if st.button("Generate Article Intro"):
-            input_text = st.session_state['article_title']
+            input_text = f"Credit Card: {credit_card_type}; Value Propositions: {value_propositions}"
             article_intro = generate_credit_card_article_intro(input_text)
             st.session_state['article_intro'] = article_intro  # Store in session state
 
