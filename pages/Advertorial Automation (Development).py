@@ -94,15 +94,6 @@ def generate_credit_card_article_intro(input_text):
                 }
             ]
             },
-            {
-            "role": "user",
-            "content": [
-                {
-                "type": "text",
-                "text": "Credit card: Wells Fargo Active Cash; Value Propositions: INTRO OFFER: Unlimited Cashback Match for all new cardmembers – only from Discover. Discover will automatically match all the cash back you’ve earned at the end of your first year! So you could turn $50 cash back into $100. Or turn $100 cash back into $200. There’s no minimum spending or maximum rewards. Just a dollar-for-dollar match.\nEarn 5% cash back on everyday purchases at different places you shop each quarter like grocery stores, restaurants, gas stations, and more, up to the quarterly maximum when you activate. Plus, earn unlimited 1% cash back on all other purchases—automatically.\nRedeem your rewards for cash at any time.\nNo credit score required to apply.\nDiscover could help you reduce exposure of your personal information online by helping you remove it from select people-search sites that could sell your data. It’s free, activate with the mobile app.\nNo annual fee and build your credit with responsible use.\n0% intro APR on purchases for 6 months, then the standard variable purchase APR of 18.24% – 27.24% applies.\nTerms and conditions apply."
-                }
-            ]
-            },
                     {
                 "role": "user",
                 "content": input_text
