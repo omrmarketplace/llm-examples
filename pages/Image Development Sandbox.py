@@ -1,19 +1,23 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 from PIL import Image
 import io
+import requests
 
 # Initialize OpenAI client
-openai.api_key = ""
+api_key = st.secrets["openai"]["OPENAI_API_KEY"]
+client = OpenAI(api_key=api_key)
 
 # Function to generate an image variation
 def generate_image_variation(image_file):
-    response = openai.Image.create_variation(
+    response = client.images.create_variation(
         image=image_file,
         n=1,
         size="1024x1024"
     )
-    return response['data'][0]['url']
+    # Access the URL from the response object
+    variant_url = response.data[0].url
+    return variant_url
 
 # Streamlit app
 def main():
@@ -41,7 +45,13 @@ def main():
             # Generate variation
             try:
                 variant_url = generate_image_variation(img_byte_arr)
-                st.image(variant_url, caption="Generated Variation", use_column_width=True)
+                st.write("Generated Variation URL:")
+                st.write(variant_url)  # Display the URL of the generated image variation
+                
+                # Display the generated image in an image container
+                response = requests.get(variant_url)
+                generated_image = Image.open(io.BytesIO(response.content))
+                st.image(generated_image, caption="Generated Variation", use_column_width=True)
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
 
