@@ -59,6 +59,7 @@ def generate_image(description):
 # Streamlit app
 def main():
     st.title("Image Description and Generation")
+    st.text("Upload must be under 2MB and a 1:1 aspect ratio. Each generation costs us about 10 cents. Only upload 1 image at a time.")
 
     # Image upload
     uploaded_file = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
