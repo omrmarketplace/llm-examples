@@ -13,7 +13,6 @@ client = OpenAI(api_key=api_key)
 # Function to encode the image
 def encode_image(image):
     buffered = io.BytesIO()
-    # Convert RGBA to RGB if necessary
     if image.mode == "RGBA":
         image = image.convert("RGB")
     image.save(buffered, format="JPEG")
@@ -66,29 +65,50 @@ def main():
     if uploaded_file is not None:
         # Open the uploaded image
         image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
 
-        # Encode the image in base64
+        # Display a resized version of the image (512x512)
+        resized_image = image.resize((512, 512))
+        st.image(resized_image, caption="Uploaded Image", use_column_width=False, width=512)
+
+        # Encode the image in base64 (using original full-size image)
         base64_image = encode_image(image)
 
+        # Initialize session state for description and generated image URL
+        if 'description' not in st.session_state:
+            st.session_state.description = ''
+        if 'generated_image_url' not in st.session_state:
+            st.session_state.generated_image_url = ''
+
         # Generate description
-        if st.button("Describe and Generate Image"):
+        if st.button("Describe Image"):
             try:
                 # Get the image description
                 description_response = describe_image(base64_image)
                 description = description_response['choices'][0]['message']['content']
-                st.write("Image Description:")
-                st.write(description)  # Output the description in plain text
-
-                # Use the description as a prompt to generate a new image
-                generated_image_url = generate_image(description)
-                st.write("Generated Image URL:")
-                st.write(generated_image_url)
-                st.image(generated_image_url, caption="Generated Image", use_column_width=True)
+                st.session_state.description = description  # Store description in session state
+                st.write("Generated Description:")
+                st.session_state.generated_image_url = ''  # Reset generated image URL
             except Exception as e:
                 st.error(f"An error occurred: {str(e)}")
                 if 'description_response' in locals():
                     st.write(description_response)  # Print raw response for debugging
+
+        # Display and allow editing of the description
+        if st.session_state.description:
+            edited_description = st.text_area("Edit Description", st.session_state.description, height=150)
+
+            # Button to generate the image
+            if st.button("Generate Image"):
+                if edited_description:
+                    generated_image_url = generate_image(edited_description)
+                    if generated_image_url:
+                        st.session_state.generated_image_url = generated_image_url
+
+        # Display the generated image if available
+        if st.session_state.generated_image_url:
+            st.write("Generated Image URL:")
+            st.write(st.session_state.generated_image_url)
+            st.image(st.session_state.generated_image_url, caption="Generated Image", use_column_width=False, width=512)
 
 if __name__ == "__main__":
     main()
