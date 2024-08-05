@@ -95,7 +95,7 @@ def main():
 
         # Display and allow editing of the description
         if st.session_state.description:
-            edited_description = st.text_area("Edit Description", st.session_state.description, height=150)
+            edited_description = st.text_area("Image Prompt: Adjust As Needed", st.session_state.description, height=150)
 
             # Button to generate the image
             if st.button("Generate Image"):
