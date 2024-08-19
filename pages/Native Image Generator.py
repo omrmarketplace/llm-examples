@@ -50,7 +50,7 @@ def generate_image(description):
     response = client.images.generate(
         prompt=description,
         model="dall-e-3",
-        size="1024x1024",
+        size="1792x1024",
         n=1,
     )
     return response.data[0].url
