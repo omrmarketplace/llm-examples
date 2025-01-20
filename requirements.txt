@@ -11,3 +11,5 @@ streamlit-feedback
 langchain-community
 st-gsheets-connection
 Pillow
+json
+base64
